@@ -1,0 +1,136 @@
+<html>
+<head>
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.2.1.min.js"></script>
+    <style>
+        body {font-size: 25px; font-family: "Segoe UI";}
+        input {font-size: 25px; font-family: "Segoe UI";}
+        table {font-size: 25px; font-family: "Segoe UI";}
+        .mytable {font-size: 25px; font-family: "Segoe UI"; border: 1px solid black; width: 50%; text-alignment: center;}
+        .mytr {border: 1px solid black;}
+        .mytd {border: 1px solid black; align: center;}
+    </style>
+</head>
+<body>
+<div align="center">
+    <table>
+        <tr>
+            <td><input id="start" type="button" value="Indítás" /></td>
+            <td><input id="end" type="button" value="Leállítás" /></td>
+        </tr>
+    </table>
+    <div id="started" hidden>Folyamatban</div>
+    <div id="ended" hidden>Leállítva</div>
+    <br>
+    <input id="get" type="button" value="Tippek lekérése" />
+
+    <table class="mytable" id="VoteTable" align="center">
+        <tr class="mytr">
+            <td class="mytd" align="center">Név</td><td class="mytd" align="center">Email</td><td class="mytd" align="center">Tipp</td>
+        </tr>
+    </table>
+    <br><br>
+    Tényleges helyezés: <input id="result" type="text" />
+    <br>
+    <input id="lot" type="button" value="Sorsolás" />
+    <br>
+    Nyertes: <input id="winner" type="text" disabled/>
+</div>
+
+    <script id="source" language="javascript" type="text/javascript">
+        function setVisible()
+        {
+            $.post("privatemain.php?action=get", function (data) {
+                var datasplitted = data.split("\n");
+                if(datasplitted[0] === "1")
+                {
+                    document.getElementById("started").hidden = false;
+                    document.getElementById("ended").hidden = true;
+                }
+                else
+                {
+                    document.getElementById("started").hidden = true;
+                    document.getElementById("ended").hidden = false;
+                }
+            });
+        }
+        setVisible();
+
+        $('input#start').on('click', function () {
+            $.post("privatemain.php?action=start", function (data) { setVisible(); });
+        });
+
+        $('input#end').on('click', function () {
+            $.post("privatemain.php?action=end", function (data) { setVisible(); });
+        });
+
+        $('input#get').on('click', function () {
+            $.post("privatemain.php?action=get", function (data) {
+                var datasplitted = data.split("\n");
+                var table = document.getElementById("VoteTable");
+
+                if(datasplitted.length < 2) alert("Nem  érkezett be tipp!")
+
+                for (var i = 1; i < datasplitted.length; i++) {
+                    var record = datasplitted[i].split(";");
+
+                    if (record.length == 4) {
+                        var tr = document.createElement('tr');
+
+                        var td1 = document.createElement('td');
+                        var td2 = document.createElement('td');
+                        var td3 = document.createElement('td');
+
+                        var text1 = document.createTextNode(record[0]);
+                        var text2 = document.createTextNode(record[1]);
+                        var text3 = document.createTextNode(record[2]);
+
+                        td1.appendChild(text1);
+                        td1.align = "center";
+                        td2.appendChild(text2);
+                        td2.align = "center";
+                        td3.appendChild(text3);
+                        td3.align = "center";
+                        tr.appendChild(td1);
+                        tr.appendChild(td2);
+                        tr.appendChild(td3);
+                        tr.id = i;
+
+                        table.appendChild(tr);
+                    }
+                }
+            });
+        });
+
+        $('input#lot').on('click', function () {
+            var result = document.getElementById("result").value;
+            var table = document.getElementById("VoteTable");
+
+            var successVotes = [];
+
+            for (var i = 1, row; row = table.rows[i]; i++) {
+                num = row.cells[2].textContent;
+                if (num == result)
+                {
+var tr = document.getElementById(i);
+tr.style.backgroundColor = "#11EE11";
+                    successVotes[successVotes.length] = i;
+                }
+            }
+
+            if (successVotes.length == 0) {
+                alert("Nem érkezett helyes tipp.");
+            }
+            else {
+                var winnerIdx = Math.floor(Math.random() * successVotes.length);
+
+                var idx = successVotes[winnerIdx];
+
+                var winnerTxt = (table.rows[idx].cells[0].textContent + " - " + table.rows[idx].cells[1].textContent);
+
+                document.getElementById("winner").value = winnerTxt;
+            }
+        });
+
+    </script>
+</body>
+</html>

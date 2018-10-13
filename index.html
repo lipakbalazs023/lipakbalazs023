@@ -1,0 +1,163 @@
+<html>
+<head>
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.2.1.min.js"></script>
+    <style>
+        input { font-size: 24px; border-radius: 10px;}
+        select { font-size: 24px; border-radius: 10px;}
+        button { font-size: 40px; border-radius: 10px; vertical-align: top; background: white; border: 5px solid;}
+        button:hover { background-color: grey; }
+        body { background-image: url('hatter.jpg'); background-repeat: no-repeat; width:100%; height:100%; background-position:center; font-family: "Segoe UI"; text-shadow: -2px 0 white, 0 2px white, 2px 0 white, 0 -2px white;}
+        .footer {position: absolute; right: 0; bottom: 0; left: 0; padding: 1rem; text-align: center; }
+    </style>
+</head>
+<body>
+<div>
+    <div align="center">
+        <img src="capeta.jpg" height="270" width="375" />
+        <img src="formula.jpg" height="270" width="480" />
+    </div>
+    <div id="startdiv">
+    <div align="center">
+        <font size="8"><b>Hegyvári János - the_hungarian_racing_guy - Hivatalos Tipp Oldala</b></font>
+        <br>
+        <font size="5"><b>(Tippelős nyereményjáték esetén itt tudsz jelentkezni.<br>1 felhasználó, 1 e-mail címmel csak 1 tippet tud leadni, a rendszer kiszűri, ha többször élnél a lehetőséggel.<br>Sok sikert és jó játékot!)</b></font>
+    </div>
+    <div align="center">
+            <table>
+            <tr>
+                <td><div align="right" ><font size="8"><b>Név: </b></font><img src="nev.png" height="60" width="60" /></div></td>
+                <td><input id="input_name" type="text" /></td>
+            </tr>
+            <tr>
+                <td><div align="right"><font size="8"><b>Email: </b></font><img src="email.png" height="60" width="60" /></td>
+                <td><input id="input_email" type="text" /></td>
+            </tr>
+            <tr>
+                <td><div align="right"><font size="8"><b>Helyezés: </b></font><img src="helyezes.png" height="60" width="60" /></td>
+                <td>
+                    <select id="input_pos" />
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                        <option value="10">10</option>
+                        <option value="11">11</option>
+                        <option value="12">12</option>
+                        <option value="13">13</option>
+                        <option value="14">14</option>
+                        <option value="15">15</option>
+                        <option value="16">16</option>
+                        <option value="17">17</option>
+                        <option value="18">18</option>
+                        <option value="19">19</option>
+                        <option value="20">20</option>
+                        <option value="21">21</option>
+                        <option value="22">22</option>
+                        <option value="23">23</option>
+                        <option value="24">24</option>
+                        <option value="25">25</option>
+                        <option value="26">26</option>
+                        <option value="27">27</option>
+                        <option value="28">28</option>
+                        <option value="29">29</option>
+                        <option value="30">30</option>
+                        <option value="31">31</option>
+                        <option value="32">32</option>
+                        <option value="33">33</option>
+                        <option value="34">34</option>
+                        <option value="35">35</option>
+                        <option value="36">36</option>
+                        <option value="37">37</option>
+                        <option value="38">38</option>
+                        <option value="39">39</option>
+                        <option value="40">40</option>
+                    </select>
+                </td>
+            </tr>
+        </table>
+        <button id="vote">Tipp leadása <img src="ok.png" height="50" width="50" /></button>
+    </div>
+    </div>
+    <div id="enddiv" align="center" hidden>
+        <font size="8">Köszönöm, hogy tippeltél!</font>
+    </div>
+
+    <script id="source" language="javascript" type="text/javascript">
+        $('button#vote').on('click', function () {
+            var checkfailed = false;
+            var name = $('input#input_name')[0].value;
+            var email = $('input#input_email')[0].value;
+            var pos = $('select#input_pos')[0].value;
+            var posInt;
+
+            if(name === "")
+            {
+                alert("Kérlek add meg a neved!");
+                checkfailed = true;
+            }
+            if(email === "")
+            {
+                alert("Kérlek add meg az email címed!");
+                checkfailed = true;
+            }
+            if(pos === "")
+            {
+                alert("Kérlek add meg a tipped!");
+                checkfailed = true;
+            }
+            if(pos != "")
+            {
+                posInt = parseInt(pos);
+                if(!(posInt > 0))
+                {
+                    alert("A tippnek egy számnak kell lennie!");
+                    checkfailed = true;
+                }
+            }
+
+            if(!checkfailed)
+            {
+                $.post("main.php?type=get&name=n&email=n&pos=1&date=n", function (data) {
+                    console.log(data);
+                    var datasplitted = data.split("\n");
+
+                    var used = false;
+                    if (datasplitted[0] === "1") {
+                        for (var i = 1; i < datasplitted.length; i++) {
+                            var record = datasplitted[i].split(";");
+
+                            if (record.length == 4) {
+                                if (record[1] === email) used = true;
+                            }
+                        }
+
+                        if (!used) {
+                            var date = new Date().toLocaleString();
+                            $.post("main.php?type=post&name=" + name + "&email=" + email + "&pos=" + posInt + "&date=" + date, function (data) {
+                                
+                            });
+                                document.getElementById("startdiv").hidden = true;
+                                document.getElementById("enddiv").hidden = false;
+                        }
+                        else {
+                            alert("Erre a versenyre már adtál le tippet!");
+                        }
+                    }
+                    else {
+                        alert("A tippelésre lejárt a határidő!");
+                    }
+                    
+                });
+            }
+        });
+    </script>
+</body>
+<div class="footer" align="right">
+<b>Powered by Power :)</b>
+</div>
+</html>
